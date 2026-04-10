@@ -1,0 +1,9 @@
+{
+  "name": "video-labeler",
+  "private": true,
+  "workspaces": [
+    "shared",
+    "server",
+    "client"
+  ]
+}

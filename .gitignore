@@ -1,0 +1,7 @@
+videos/*.mov
+videos/*.mp4
+node_modules/
+.dist/
+.env
+client/dist/
+.DS_Store

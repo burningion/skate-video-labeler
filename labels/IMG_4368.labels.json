@@ -1,0 +1,24 @@
+{
+  "source_video": "IMG_4368.mp4",
+  "video_meta": {
+    "duration_sec": 0,
+    "fps": 30,
+    "resolution": "unknown"
+  },
+  "samples": [
+    {
+      "sample_id": "IMG_4368_82kV2Dn5",
+      "attempt_start_sec": 0.8401843997330665,
+      "attempt_end_sec": 1.7577686506506534,
+      "outcome": "fall",
+      "trick_category": "flip_trick",
+      "trick_name": "no_comply_fs_shove-it",
+      "quality_flags": [],
+      "labeler_confidence": "high",
+      "labeler_id": "kirk",
+      "notes": "",
+      "created_at": "2026-04-10T20:00:00.237Z",
+      "updated_at": "2026-04-10T20:00:00.237Z"
+    }
+  ]
+}
