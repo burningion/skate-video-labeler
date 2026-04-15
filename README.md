@@ -81,6 +81,17 @@ One JSON file per video is written to `LABEL_DIR`:
 }
 ```
 
+## Eval
+
+There's a vision model eval in `eval/` that tests whether an LLM can tell if a trick was landed by looking at frames extracted from labeled clips. It uses pydantic-evals, the OpenAI SDK, and ffmpeg.
+
+```bash
+cd eval
+uv run python run_eval.py
+```
+
+Requires Python 3.11+, [uv](https://docs.astral.sh/uv/), ffmpeg, and a running OpenAI-compatible vision endpoint (configured in `eval/task.py`). See `eval/README.md` for details.
+
 ## Video requirements
 
 - **Format:** MP4 (H.264) is recommended for browser compatibility. MOV, WebM, MKV, and AVI are also accepted but may not play in all browsers.
