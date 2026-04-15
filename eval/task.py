@@ -5,6 +5,9 @@ from openai import OpenAI
 
 from models import TrickAttempt
 
+# Populated during eval — keyed by sample_id
+eval_cache: dict[str, dict] = {}
+
 client = OpenAI(
     base_url="http://puget2:8080/v1",
     api_key="not-needed",
@@ -116,4 +119,12 @@ def classify_trick_landed(inputs: TrickAttempt) -> bool:
     if "</think>" in answer:
         answer = answer.split("</think>")[-1].strip()
 
-    return "landed" in answer and "not landed" not in answer and "failed" not in answer
+    predicted = "landed" in answer and "not landed" not in answer and "failed" not in answer
+
+    eval_cache[inputs.sample_id] = {
+        "frames": frames_b64,
+        "raw_answer": answer,
+        "predicted": predicted,
+    }
+
+    return predicted

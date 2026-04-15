@@ -6,3 +6,5 @@ node_modules/
 client/dist/
 .DS_Store
 __pycache__/
+eval/.venv/
+eval/reports/
