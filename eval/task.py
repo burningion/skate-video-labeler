@@ -43,13 +43,21 @@ MODELS: list[ModelConfig] = [
         provider=Provider.ANTHROPIC,
         model_id="claude-sonnet-4-6",
         api_key_env="ANTHROPIC_API_KEY",
-        max_tokens=16,
+        max_tokens=32768,
+    ),
+    ModelConfig(
+        name="Claude Opus 4.7",
+        provider=Provider.ANTHROPIC,
+        model_id="claude-opus-4-7",
+        api_key_env="ANTHROPIC_API_KEY",
+        max_tokens=32768,
     ),
     ModelConfig(
         name="GPT-5.4",
         provider=Provider.OPENAI_COMPAT,
         model_id="gpt-5.4",
         api_key_env="OPENAI_API_KEY",
+        max_tokens=32768,
     ),
 ]
 
