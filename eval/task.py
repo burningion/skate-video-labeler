@@ -35,6 +35,7 @@ MODELS: list[ModelConfig] = [
         model_id="unsloth/Qwen3.5-397B-A17B-GGUF:UD-Q3_K_XL",
         base_url="http://puget2:8080/v1",
         api_key="not-needed",
+        max_tokens=32768,
         strip_thinking_tokens=True,
     ),
     ModelConfig(
