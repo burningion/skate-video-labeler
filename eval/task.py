@@ -24,8 +24,9 @@ class ModelConfig:
     api_key: str | None = None
     api_key_env: str | None = None
     max_tokens: int = 16
-    temperature: float = 0.0
+    temperature: float | None = 0.0
     strip_thinking_tokens: bool = False
+    thinking: dict | None = None  # e.g. {"type": "adaptive"} for Opus 4.7
 
 
 MODELS: list[ModelConfig] = [
@@ -43,7 +44,7 @@ MODELS: list[ModelConfig] = [
         provider=Provider.ANTHROPIC,
         model_id="claude-sonnet-4-6",
         api_key_env="ANTHROPIC_API_KEY",
-        max_tokens=32768,
+        max_tokens=256,
     ),
     ModelConfig(
         name="Claude Opus 4.7",
@@ -51,6 +52,8 @@ MODELS: list[ModelConfig] = [
         model_id="claude-opus-4-7",
         api_key_env="ANTHROPIC_API_KEY",
         max_tokens=32768,
+        temperature=None,
+        thinking={"type": "adaptive"},
     ),
     ModelConfig(
         name="GPT-5.4",
@@ -176,11 +179,13 @@ def _classify_openai_compat(
     )
 
     # OpenAI's newer models (GPT-5+) require max_completion_tokens; local servers use max_tokens
-    token_kwargs = (
+    extra_kwargs: dict = (
         {"max_completion_tokens": config.max_tokens}
         if config.base_url is None
         else {"max_tokens": config.max_tokens}
     )
+    if config.temperature is not None:
+        extra_kwargs["temperature"] = config.temperature
 
     response = client.chat.completions.create(
         model=config.model_id,
@@ -188,8 +193,7 @@ def _classify_openai_compat(
             {"role": "system", "content": SYSTEM_PROMPT},
             {"role": "user", "content": content},
         ],
-        temperature=config.temperature,
-        **token_kwargs,
+        **extra_kwargs,
     )
     return response.choices[0].message.content.strip().lower()
 
@@ -220,14 +224,36 @@ def _classify_anthropic(
         }
     )
 
-    response = client.messages.create(
-        model=config.model_id,
-        system=SYSTEM_PROMPT,
-        messages=[{"role": "user", "content": content}],
-        max_tokens=config.max_tokens,
-        temperature=config.temperature,
-    )
-    return response.content[0].text.strip().lower()
+    extra_kwargs: dict = {}
+    if config.temperature is not None:
+        extra_kwargs["temperature"] = config.temperature
+    if config.thinking is not None:
+        extra_kwargs["thinking"] = config.thinking
+
+    # Use streaming for thinking-enabled models (SDK requires it for large max_tokens)
+    if config.thinking is not None:
+        text_parts: list[str] = []
+        with client.messages.stream(
+            model=config.model_id,
+            system=SYSTEM_PROMPT,
+            messages=[{"role": "user", "content": content}],
+            max_tokens=config.max_tokens,
+            **extra_kwargs,
+        ) as stream:
+            response = stream.get_final_message()
+        for block in response.content:
+            if block.type == "text":
+                return block.text.strip().lower()
+        return ""
+    else:
+        response = client.messages.create(
+            model=config.model_id,
+            system=SYSTEM_PROMPT,
+            messages=[{"role": "user", "content": content}],
+            max_tokens=config.max_tokens,
+            **extra_kwargs,
+        )
+        return response.content[0].text.strip().lower()
 
 
 def make_classifier(config: ModelConfig) -> Callable[[TrickAttempt], bool]:
